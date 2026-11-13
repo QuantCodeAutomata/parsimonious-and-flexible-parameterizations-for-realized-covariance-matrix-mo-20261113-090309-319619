@@ -55,6 +55,8 @@ def _split(dates: pd.DatetimeIndex, gamma_series: np.ndarray, in_sample_end: str
     """Split the realized-covariance series into in-sample (<= in_sample_end)
     and out-of-sample (> in_sample_end) segments (Section 5)."""
     cutoff = pd.Timestamp(in_sample_end)
+    if dates.tz is not None and cutoff.tzinfo is None:
+        cutoff = cutoff.tz_localize(dates.tz)
     in_mask = dates <= cutoff
     return (
         dates[in_mask], gamma_series[in_mask],

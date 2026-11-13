@@ -1,0 +1,31 @@
+{
+  "full_run": false,
+  "tickers": [
+    "NVDA",
+    "AAPL",
+    "AMZN",
+    "MSFT",
+    "UNH",
+    "JPM",
+    "CRM",
+    "V",
+    "IBM",
+    "BA"
+  ],
+  "n_tickers": 10,
+  "start_date": "2024-01-02",
+  "end_date": "2026-05-29",
+  "in_sample_end": "2025-12-31",
+  "n_in_sample": 502,
+  "n_out_of_sample": 102,
+  "mcs_bootstrap_reps": 2000,
+  "load_elapsed_seconds": 4.966060161590576,
+  "fit_elapsed_seconds": 46.92099142074585,
+  "mcs_elapsed_seconds": 2.500000476837158,
+  "failed_tickers": {},
+  "non_massive_source": {},
+  "date_range": [
+    "2024-01-02 00:00:00-05:00",
+    "2026-05-29 00:00:00-04:00"
+  ]
+}

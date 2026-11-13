@@ -1,0 +1,113 @@
+{
+  "QL_in_sample_alpha10": {
+    "superior_set": [
+      "Lin-BEKK",
+      "HE-BEKK",
+      "Log-HE-BEKK",
+      "Lin-HE-BEKK"
+    ],
+    "eliminated_pvalues": {
+      "Log-BEKK": 0.0,
+      "vecHAR": 0.0,
+      "EWMA": 0.0,
+      "sc-BEKK": 0.005
+    }
+  },
+  "QL_in_sample_alpha25": {
+    "superior_set": [
+      "Lin-HE-BEKK"
+    ],
+    "eliminated_pvalues": {
+      "Log-BEKK": 0.0,
+      "vecHAR": 0.0,
+      "EWMA": 0.0,
+      "sc-BEKK": 0.005,
+      "Lin-BEKK": 0.1235,
+      "HE-BEKK": 0.0765,
+      "Log-HE-BEKK": 0.0765
+    }
+  },
+  "GMV_in_sample_alpha10": {
+    "superior_set": [
+      "sc-BEKK",
+      "Log-BEKK",
+      "Lin-BEKK",
+      "HE-BEKK",
+      "Log-HE-BEKK",
+      "Lin-HE-BEKK",
+      "EWMA",
+      "vecHAR"
+    ],
+    "eliminated_pvalues": {}
+  },
+  "GMV_in_sample_alpha25": {
+    "superior_set": [
+      "sc-BEKK",
+      "Lin-BEKK",
+      "HE-BEKK",
+      "Log-HE-BEKK",
+      "Lin-HE-BEKK"
+    ],
+    "eliminated_pvalues": {
+      "vecHAR": 0.1605,
+      "EWMA": 0.138,
+      "Log-BEKK": 0.1515
+    }
+  },
+  "QL_out_of_sample_alpha10": {
+    "superior_set": [
+      "sc-BEKK",
+      "Lin-BEKK",
+      "HE-BEKK",
+      "Log-HE-BEKK",
+      "Lin-HE-BEKK"
+    ],
+    "eliminated_pvalues": {
+      "vecHAR": 0.0,
+      "EWMA": 0.016,
+      "Log-BEKK": 0.013
+    }
+  },
+  "QL_out_of_sample_alpha25": {
+    "superior_set": [
+      "Lin-HE-BEKK"
+    ],
+    "eliminated_pvalues": {
+      "vecHAR": 0.0,
+      "EWMA": 0.016,
+      "Log-BEKK": 0.013,
+      "sc-BEKK": 0.18,
+      "Lin-BEKK": 0.146,
+      "Log-HE-BEKK": 0.1065,
+      "HE-BEKK": 0.106
+    }
+  },
+  "GMV_out_of_sample_alpha10": {
+    "superior_set": [
+      "Log-BEKK",
+      "EWMA"
+    ],
+    "eliminated_pvalues": {
+      "vecHAR": 0.0,
+      "HE-BEKK": 0.0,
+      "Log-HE-BEKK": 0.0,
+      "Lin-HE-BEKK": 0.0,
+      "sc-BEKK": 0.0,
+      "Lin-BEKK": 0.0
+    }
+  },
+  "GMV_out_of_sample_alpha25": {
+    "superior_set": [
+      "EWMA"
+    ],
+    "eliminated_pvalues": {
+      "vecHAR": 0.0,
+      "HE-BEKK": 0.0,
+      "Log-HE-BEKK": 0.0,
+      "Lin-HE-BEKK": 0.0,
+      "sc-BEKK": 0.0,
+      "Lin-BEKK": 0.0,
+      "Log-BEKK": 0.247
+    }
+  }
+}

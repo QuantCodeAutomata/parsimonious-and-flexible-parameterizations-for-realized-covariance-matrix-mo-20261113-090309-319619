@@ -52,7 +52,12 @@ def _bounds_and_constraints(model: str, gamma_series: np.ndarray):
     positive-semidefiniteness conditions of Section 3 for ``model``."""
     names = PARAM_NAMES[model]
     idx = {name: i for i, name in enumerate(names)}
-    bounds = [(1e-6, None)] * len(names)
+    # kappa*Gamma_bar is one additive component of a matrix whose stationary
+    # scale is Gamma_bar itself (Section 2), so kappa cannot stray far above
+    # unity without violating (2.3); an explicit finite bound keeps SLSQP from
+    # diverging to numerically meaningless values in the (data-independent)
+    # unbounded region above the inequality constraints below.
+    bounds = [(1e-6, 5.0)] * len(names)
     cons = []
 
     if model == "sc-BEKK":
@@ -71,7 +76,7 @@ def _bounds_and_constraints(model: str, gamma_series: np.ndarray):
         max_xi = max_xi_lin_bekk(gamma_series)
         bounds[idx["alpha_v"]] = (1e-6, 10.0)
         bounds[idx["alpha_c"]] = (0.0, 10.0)
-        bounds[idx["alpha_a"]] = (0.0, None)
+        bounds[idx["alpha_a"]] = (0.0, 20.0)
         bounds[idx["b"]] = (0.0, 0.999)
         cons.append({"type": "ineq", "fun": lambda t: t[idx["alpha_v"]] - t[idx["alpha_c"]] - 1e-6})
         cons.append({"type": "ineq",
@@ -98,7 +103,7 @@ def _bounds_and_constraints(model: str, gamma_series: np.ndarray):
         min_xi_star = min_xi_star_lin_he_bekk(gamma_series)
         bounds[idx["a"]] = (1e-6, 5.0)
         bounds[idx["varphi"]] = (0.0, 20.0)
-        bounds[idx["alpha_a"]] = (0.0, None)
+        bounds[idx["alpha_a"]] = (0.0, 20.0)
         bounds[idx["b"]] = (0.0, 0.999)
         cons.append({"type": "ineq", "fun": lambda t: 1 - (t[idx["a"]] + t[idx["b"]]) - 1e-6})
         cons.append({"type": "ineq",

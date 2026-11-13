@@ -1,0 +1,52 @@
+{
+  "n_replications_used": 12,
+  "n_replications_paper": 500,
+  "sample_sizes": [
+    100,
+    500,
+    1000,
+    2000
+  ],
+  "seed": 20261113,
+  "elapsed_seconds": 1544.0163402557373,
+  "smallest_normal_T": {
+    "sc-BEKK:kappa": 100,
+    "sc-BEKK:a": 100,
+    "sc-BEKK:b": 100,
+    "Log-BEKK:kappa": 1000,
+    "Log-BEKK:a0": 1000,
+    "Log-BEKK:a1": 2000,
+    "Log-BEKK:phi": 100,
+    "Log-BEKK:c": 1000,
+    "Log-BEKK:b": 1000,
+    "Lin-BEKK:kappa": 100,
+    "Lin-BEKK:alpha_v": 100,
+    "Lin-BEKK:alpha_c": 100,
+    "Lin-BEKK:alpha_a": null,
+    "Lin-BEKK:b": 100,
+    "HE-BEKK:kappa": 100,
+    "HE-BEKK:a": 100,
+    "HE-BEKK:varphi": 100,
+    "HE-BEKK:b": 100,
+    "Log-HE-BEKK:kappa": 100,
+    "Log-HE-BEKK:a": 100,
+    "Log-HE-BEKK:a1": null,
+    "Log-HE-BEKK:phi": 100,
+    "Log-HE-BEKK:c": 100,
+    "Log-HE-BEKK:varphi": 100,
+    "Log-HE-BEKK:b": 100,
+    "Lin-HE-BEKK:kappa": 100,
+    "Lin-HE-BEKK:a": 100,
+    "Lin-HE-BEKK:varphi": 100,
+    "Lin-HE-BEKK:alpha_a": 500,
+    "Lin-HE-BEKK:b": 100
+  },
+  "data_info": {
+    "n_days": 63,
+    "date_range": [
+      "2026-03-02 00:00:00-05:00",
+      "2026-05-29 00:00:00-04:00"
+    ],
+    "universe_size": 30
+  }
+}
