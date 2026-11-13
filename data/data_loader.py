@@ -254,3 +254,66 @@ def annualize_realized_covariance(gamma_series: np.ndarray, trading_days: int = 
     """Annualize a series of daily realized covariance matrices, as used
     throughout Section 5 ("annualized realized covariance matrices")."""
     return gamma_series * trading_days
+
+
+def _quarterly_chunks(start_date: str, end_date: str) -> list[tuple[str, str]]:
+    """Split [start_date, end_date] into calendar-quarter windows. A single
+    `/fetch-ohlcvs` request for multi-year 5-minute bars across 30 tickers
+    times out server-side; quarter-sized requests (about 3 months, ~210k
+    rows for 30 tickers) complete reliably, so the full multi-year window is
+    downloaded as a sequence of quarterly requests and concatenated."""
+    chunks = []
+    cur = pd.Timestamp(start_date)
+    end = pd.Timestamp(end_date)
+    while cur <= end:
+        quarter_end = (cur + pd.offsets.QuarterEnd(0)).normalize()
+        chunk_end = min(quarter_end, end)
+        chunks.append((cur.strftime("%Y-%m-%d"), chunk_end.strftime("%Y-%m-%d")))
+        cur = chunk_end + pd.Timedelta(days=1)
+    return chunks
+
+
+def load_djia_realized_covariance(
+    tickers: list[str],
+    start_date: str,
+    end_date: str,
+    timeframe: str,
+    identity_date: str,
+    use_cache: bool = True,
+) -> tuple[pd.DatetimeIndex, np.ndarray, dict]:
+    """End-to-end realized covariance series for the DJIA constituents
+    (Section 5): intraday bars -> daily realized covariance -> annualized
+    covariance matrices. Shared by the Monte Carlo study (Section 4.1, where
+    the initial condition S_0 is "extracted from the realized covariance
+    series of the application in Section 5") and the empirical application.
+
+    The intraday bars are downloaded in calendar-quarter chunks (see
+    :func:`_quarterly_chunks`) to stay inside the Dataloader's per-request
+    time limit for multi-year intraday history.
+
+    Returns (dates, gamma_series, meta) with gamma_series of shape (T, n, n),
+    annualized, and ``meta`` the Dataloader load metadata (per-chunk
+    ``ticker_details``/``failed``/``non_massive_source`` merged together).
+    """
+    chunk_frames = []
+    all_details, all_failed, all_non_massive = [], {}, {}
+    for chunk_start, chunk_end in _quarterly_chunks(start_date, end_date):
+        bars, meta = load_ohlcv(
+            tickers, chunk_start, chunk_end, timeframe=timeframe,
+            identity_date=identity_date, use_cache=use_cache,
+        )
+        chunk_frames.append(bars)
+        all_details.extend(meta.get("ticker_details", []))
+        all_failed.update(meta.get("failed", {}))
+        all_non_massive.update(meta.get("non_massive_source", {}))
+    bars = pd.concat(chunk_frames, ignore_index=True)
+    meta = {
+        "request": {"tickers": tickers, "start_date": start_date, "end_date": end_date,
+                     "timeframe": timeframe, "identity_date": identity_date},
+        "ticker_details": all_details,
+        "failed": all_failed,
+        "non_massive_source": all_non_massive,
+    }
+    dates, gamma_series = realized_covariance_from_intraday(bars, tickers)
+    gamma_series = annualize_realized_covariance(gamma_series)
+    return dates, gamma_series, meta

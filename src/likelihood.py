@@ -17,6 +17,7 @@ targets univariate/DCC GARCH, not Wishart-based realized-covariance BEKK).
 from __future__ import annotations
 
 import numpy as np
+from scipy.special import gammaln
 
 from src.models import compute_A, unpack_params
 
@@ -49,6 +50,34 @@ def neg_log_likelihood(theta: np.ndarray, model: str, gamma_series: np.ndarray,
     if not np.isfinite(total):
         return 1e10
     return total  # negative log-likelihood up to the positive scale nu/2
+
+
+def delta_t_sum(gamma_series: np.ndarray, nu: float) -> float:
+    """sum_{t=2}^{T} delta_t (eq. 4.2, Section 4), the additive constant that
+    does not involve the model parameters:
+
+        delta_t = (n*nu/2) ln(nu/2) - (n(n-1)/4) ln(pi)
+                  + ((nu-n-1)/2) ln|Gamma_t| - sum_{i=1}^{n} ln Gamma((nu+1-i)/2)
+
+    Included only to report a log-likelihood on the same scale as the
+    paper's Table 3; it is identical across the six models for fixed nu and
+    therefore irrelevant to AIC/BIC differences and MCS rankings."""
+    t_len, n, _ = gamma_series.shape
+    const = (n * nu / 2.0) * np.log(nu / 2.0) - (n * (n - 1) / 4.0) * np.log(np.pi)
+    const -= gammaln((nu + 1 - np.arange(1, n + 1)) / 2.0).sum()
+    total = 0.0
+    for t in range(1, t_len):
+        sign, logdet = np.linalg.slogdet(gamma_series[t])
+        total += const + ((nu - n - 1) / 2.0) * logdet
+    return total
+
+
+def full_log_likelihood(theta: np.ndarray, model: str, gamma_series: np.ndarray,
+                         s0: np.ndarray, gamma_bar: np.ndarray, nu: float) -> float:
+    """Full quasi log-likelihood (4.2) including delta_t and the nu/2 scale,
+    evaluated at the two-step QML estimate theta_hat."""
+    neg_ll = neg_log_likelihood(theta, model, gamma_series, s0, gamma_bar)
+    return delta_t_sum(gamma_series, nu) - (nu / 2.0) * neg_ll
 
 
 def score_contributions(theta: np.ndarray, model: str, gamma_series: np.ndarray,

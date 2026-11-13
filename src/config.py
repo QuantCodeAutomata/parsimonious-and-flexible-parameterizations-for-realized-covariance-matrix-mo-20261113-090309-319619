@@ -73,21 +73,31 @@ DJIA_UNIVERSE_SIZE_PAPER = 30
 # the Dataloader/Massive data path (the paper's source, the VOLARE platform,
 # is not reachable from this environment) and must instead be built from
 # intraday bars using the realized-covariance estimator of Barndorff-Nielsen
-# and Shephard (2004). A timed download of all 30 constituents' 5-minute bars
-# over three months (213,542 rows, 34.9 seconds) scales to an estimated 26.6
-# minutes for the full Jan 2, 2015 - May 29, 2026 window, well inside the
-# download-time budget, so the full 30-stock universe and the paper's full
-# sample period are both used (see results/RESULTS.md for the measured
-# timing and realized download log).
-DJIA_TICKERS = [
+# and Shephard (2004). A timed request of 10 tickers' 5-minute bars over one
+# calendar quarter took 55.8 seconds (92,618 rows); the Dataloader chunks
+# multi-year intraday history into quarterly calls issued one at a time, so
+# the paper's full 30-stock, 2015-2026 window (about 45 quarterly calls at 30
+# tickers each) would take on the order of hours, exceeding the time left for
+# the experiments and tests. The universe is therefore cut to the 10 most
+# liquid DJIA constituents (ranked by October-2025 average dollar volume,
+# close*volume, from the Dataloader) and the in-sample window is shortened to
+# two years; the out-of-sample window equals the paper's exactly (Section 5:
+# "102 observations from 2026"). See results/RESULTS.md for the measured
+# timing, the full 30-stock ticker list and ranking, and the command that
+# runs the paper's full universe and period.
+DJIA_TICKERS_PAPER = [
     "MMM", "AXP", "AMGN", "AMZN", "AAPL", "BA", "CAT", "CVX", "CSCO", "KO",
     "DIS", "GS", "HD", "HON", "IBM", "JPM", "JNJ", "MCD", "MRK", "MSFT",
     "NKE", "NVDA", "PG", "CRM", "SHW", "TRV", "UNH", "VZ", "V", "WMT",
 ]  # 30 DJIA constituents (not specified in the paper beyond the AAPL/AMGN examples)
-DJIA_UNIVERSE_SIZE_RUN = 30          # number of DJIA constituents used in the executed run
+DJIA_TICKERS_RUN = [
+    "NVDA", "AAPL", "AMZN", "MSFT", "UNH", "JPM", "CRM", "V", "IBM", "BA",
+]  # 10 most liquid of the above by October-2025 average dollar volume
+DJIA_TICKERS = DJIA_TICKERS_RUN
+DJIA_UNIVERSE_SIZE_RUN = len(DJIA_TICKERS_RUN)   # number of DJIA constituents used in the executed run
 RC_BAR_TIMEFRAME = "5m"              # intraday bar size used to build realized covariance (standard RV estimator)
 DJIA_IDENTITY_DATE = "2026-05-29"    # point-in-time date for ticker identity (last date of the sample period)
-DJIA_START_DATE_RUN = DJIA_START_DATE_PAPER  # executed sample start equals the paper's sample start
+DJIA_START_DATE_RUN = "2024-01-02"   # shortened in-sample start (download-time constraint, see comment above)
 DJIA_END_DATE_RUN = DJIA_END_DATE_PAPER      # executed sample end equals the paper's sample end
 DJIA_IN_SAMPLE_END_RUN = DJIA_IN_SAMPLE_END_PAPER  # executed in-sample/out-of-sample split equals the paper's
 
