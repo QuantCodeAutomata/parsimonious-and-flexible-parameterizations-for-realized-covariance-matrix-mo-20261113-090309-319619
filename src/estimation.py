@@ -40,10 +40,18 @@ def _initial_guess(model: str, gamma_bar: np.ndarray) -> np.ndarray:
     mean under modest persistence."""
     scale = 0.1
     defaults = {
-        "kappa": scale, "a": 0.3, "b": 0.5, "a0": 0.2, "a1": 0.1, "phi": 1.0,
+        "kappa": scale, "a": 0.3, "b": 0.5,
+        # a0, a1, b kept modest for the logistic models: the news coefficient
+        # A_t = a0 + a1*G_t multiplies the full Gamma_{t-1} matrix (not just
+        # its diagonal), so a starting point with a0+a1+b close to the
+        # stability bound of 1 (as for sc-BEKK) left S_t outside the positive
+        # -definite cone on real data before the first SLSQP step, trapping
+        # the optimizer in the flat infeasible-region penalty.
+        "a0": 0.05, "a1": 0.0, "phi": 0.5,
         "c": float(np.median(np.diag(gamma_bar))), "alpha_v": 0.3, "alpha_c": 0.1,
-        "alpha_a": 0.05, "varphi": 0.5,
+        "alpha_a": 0.05, "varphi": 0.3,
     }
+    defaults["b"] = 0.3 if model in ("Log-BEKK", "Log-HE-BEKK") else defaults["b"]
     return np.array([defaults[name] for name in PARAM_NAMES[model]], dtype=float)
 
 
@@ -68,7 +76,14 @@ def _bounds_and_constraints(model: str, gamma_series: np.ndarray):
         bounds[idx["a0"]] = (1e-6, 5.0)
         bounds[idx["a1"]] = (0.0, 5.0)
         bounds[idx["phi"]] = (1e-6, 50.0)
-        bounds[idx["c"]] = (None, None)
+        # c is the threshold compared with Gamma_{t-1} entries inside the
+        # logistic G_t (Section 3.1): bounding it to the observed data range
+        # keeps SLSQP from drifting to numerically meaningless values once
+        # phi*(Gamma-c) saturates the logistic (flat-likelihood region noted
+        # in Section 4.1 for phi).
+        spread = float(np.ptp(gamma_series))
+        c_lo, c_hi = float(gamma_series.min()) - 3 * spread, float(gamma_series.max()) + 3 * spread
+        bounds[idx["c"]] = (c_lo, c_hi)
         bounds[idx["b"]] = (0.0, 0.999)
         cons.append({"type": "ineq", "fun": lambda t: 1 - (t[idx["a0"]] + t[idx["a1"]] + t[idx["b"]]) - 1e-6})
 
@@ -93,7 +108,12 @@ def _bounds_and_constraints(model: str, gamma_series: np.ndarray):
         bounds[idx["a"]] = (1e-6, 5.0)
         bounds[idx["a1"]] = (0.0, 5.0)
         bounds[idx["phi"]] = (1e-6, 50.0)
-        bounds[idx["c"]] = (None, None)
+        # c thresholds V_{t-1} (realized variances, Section 3.3): bound it to
+        # the observed diagonal range for the same reason as in Log-BEKK above.
+        diag_vals = np.diagonal(gamma_series, axis1=1, axis2=2)
+        spread = float(np.ptp(diag_vals))
+        c_lo, c_hi = float(diag_vals.min()) - 3 * spread, float(diag_vals.max()) + 3 * spread
+        bounds[idx["c"]] = (c_lo, c_hi)
         bounds[idx["varphi"]] = (0.0, 20.0)
         bounds[idx["b"]] = (0.0, 0.999)
         cons.append({"type": "ineq",

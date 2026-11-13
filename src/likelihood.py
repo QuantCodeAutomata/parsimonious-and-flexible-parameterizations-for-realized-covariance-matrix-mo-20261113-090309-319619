@@ -35,21 +35,38 @@ def neg_log_likelihood(theta: np.ndarray, model: str, gamma_series: np.ndarray,
         try:
             a_t = compute_A(model, theta, gamma_prev, n)
         except np.linalg.LinAlgError:
-            return 1e10
+            return _infeasible_penalty(s_prev)
         s_t = p["kappa"] * gamma_bar + a_t * gamma_prev + p["b"] * s_prev
+        eigvals = np.linalg.eigvalsh(0.5 * (s_t + s_t.T))
+        if eigvals.min() <= 1e-10:
+            # S_t left the positive-definite cone: the plain parameter-free
+            # 1e10 constant used previously gives SLSQP zero gradient and
+            # traps the optimizer at any infeasible starting point (observed
+            # for Log-BEKK/Log-HE-BEKK, whose logistic A_t need not be PSD).
+            # A penalty growing with the eigenvalue violation restores a
+            # usable gradient back toward the feasible region.
+            return 1e8 + 1e8 * float(-eigvals.min())
         sign, logdet = np.linalg.slogdet(s_t)
-        if sign <= 0:
-            return 1e10
         try:
             trace_term = np.trace(np.linalg.solve(s_t, gamma_series[t]))
         except np.linalg.LinAlgError:
-            return 1e10
+            return _infeasible_penalty(s_prev)
         total += logdet + trace_term
         s_prev = s_t
         gamma_prev = gamma_series[t]
     if not np.isfinite(total):
         return 1e10
     return total  # negative log-likelihood up to the positive scale nu/2
+
+
+def _infeasible_penalty(s_prev: np.ndarray) -> float:
+    """Fallback penalty when ``compute_A``/``solve`` itself raises, scaled by
+    how far ``s_prev`` already is from well-conditioned (keeps a gradient)."""
+    try:
+        cond = float(np.linalg.cond(s_prev))
+    except np.linalg.LinAlgError:
+        cond = 1e12
+    return 1e8 + min(cond, 1e8)
 
 
 def delta_t_sum(gamma_series: np.ndarray, nu: float) -> float:

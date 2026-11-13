@@ -162,7 +162,15 @@ of EWMA/Log-BEKK, contrary to the paper (**not reproduced**).
   logistic Log-BEKK parameterization did not converge to an interior optimum in this run
   (parameters remained at their starting bounds and the reported log-likelihood is not
   meaningful); Table 1 and Table 3 rows for Log-BEKK are not reliable and are reported
-  as "not reproduced" rather than adjusted to match the paper.
+  as "not reproduced" rather than adjusted to match the paper. The infeasible-region
+  penalty in the quasi log-likelihood (Section 4, eq. 4.2) was subsequently hardened to
+  keep a usable gradient when S_t leaves the positive-definite cone, and the starting
+  value and bounds for the threshold `c` of the logistic weight G_t (Section 3.1) were
+  tied to the observed range of Gamma_{t-1}. On a slice check this removes the
+  zero-gradient trap but does not resolve the bias in `phi` and `c`, which remains large
+  at T=100 together with elevated bias in `kappa`; this is consistent with, but broader
+  than, the flat-likelihood region the paper itself reports for `phi` in the logistic
+  models (Section 4.1), and the root cause was not further isolated.
 - **Exact ranking of Log-HE-BEKK as best model (Table 3).** At the reduced universe and
   replication counts used here, Lin-HE-BEKK attains the highest log-likelihood instead of
   Log-HE-BEKK, and the out-of-sample GMV ranking (paper: Lin-HE-BEKK dominates) is not
