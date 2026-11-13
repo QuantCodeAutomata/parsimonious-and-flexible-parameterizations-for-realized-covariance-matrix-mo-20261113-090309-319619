@@ -40,13 +40,12 @@ def variance_diag(gamma: np.ndarray) -> np.ndarray:
 
 
 def _matrix_logistic(sym: np.ndarray, phi: float, c: float) -> np.ndarray:
-    """Logistic function G_t = (I_n + exp(-phi*(sym - c)))^{-1} (eq. 3.2).
+    """Logistic function G_t = (I_n + exp(-phi*(sym - c)))^{-1} (eq. 3.2, Section 3.1).
 
-    Per the paper's implementation notes (Section 3.1): the exponential
-    inside is an elementwise (Hadamard) exponential of the matrix
-    ``-phi*(sym - c)`` (``c`` is a scalar subtracted from every entry), and
-    the outer ``^{-1}`` is an ordinary matrix inverse of the resulting
-    I_n + elementwise-exponential matrix.
+    The exponential inside is an elementwise (Hadamard) exponential of the
+    matrix ``-phi*(sym - c)`` (``c`` is a scalar subtracted from every
+    entry), and the outer ``^{-1}`` is an ordinary matrix inverse of the
+    resulting I_n + elementwise-exponential matrix.
     """
     exponent = np.clip(-phi * (sym - c), -700.0, 700.0)  # avoid float overflow in exp
     inner = np.eye(sym.shape[0]) + np.exp(exponent)

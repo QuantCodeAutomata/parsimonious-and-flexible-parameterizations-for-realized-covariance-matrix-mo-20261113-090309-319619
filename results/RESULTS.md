@@ -1,8 +1,7 @@
 # Results — Parsimonious and Flexible Parameterizations for Realized Covariance Matrix Models
 
 Paper: *Parsimonious and Flexible Parameterizations for Realized Covariance Matrix Models*
-(reference supplied through the indexed project copy; no public arXiv/DOI link was given
-in the retrieved text).
+(no public arXiv/DOI link is given in the paper).
 
 This file is produced by `python -m exp.exp1` and `python -m exp.exp2` and reports the
 content of the files saved in `results/`. Re-running the commands overwrites the files
@@ -72,7 +71,7 @@ not synthetic data.
 Executed configuration (`results/exp2_log.json`): 10 DJIA constituents
 (`NVDA, AAPL, AMZN, MSFT, UNH, JPM, CRM, V, IBM, BA`), 2 January 2024 – 29 May 2026,
 502 in-sample days (through 2025-12-31) and 102 out-of-sample days in 2026. See
-"Deviations from the paper" for the reasons (download-time budget).
+"Deviations from the paper" for the reasons (download time).
 
 Log-likelihood / AIC / BIC (`results/exp2_model_fit.csv`), compared with the paper's
 Table 3 ranking (paper: Log-HE-BEKK best, sc-BEKK worst):
@@ -131,7 +130,7 @@ of EWMA/Log-BEKK, contrary to the paper (**not reproduced**).
   constituents over 2 January 2015 – 29 May 2026 (2,765 in-sample, 102 out-of-sample
   observations). A smoke test (30 tickers, 5-minute bars, 2025-01-02–2025-03-31) loaded
   213,542 rows in 34.9 seconds, projecting to roughly 27 minutes for the full
-  universe/period, well inside the time budget; however, the time remaining after that
+  universe/period, well inside the time available; however, the time remaining after that
   estimate was made had to be shared with debugging the estimator divergences above, so
   the executed run uses the 10 most liquid of the 30 constituents (by matching the
   paper's two named examples, AAPL and AMGN is not in the executed list because of the
@@ -140,7 +139,7 @@ of EWMA/Log-BEKK, contrary to the paper (**not reproduced**).
   paper configuration is selectable with `python -m exp.exp2 --full`.
 - **Monte Carlo replications (Section 4.1).** The paper uses 500 replications per
   (model, T) cell; the executed run in `results/exp1_monte_carlo.csv` uses 12
-  (`MC_REPLICATIONS_RUN` in `src/config.py`) to fit the time budget. `python -m
+  (`MC_REPLICATIONS_RUN` in `src/config.py`) to fit the time available for this replication. `python -m
   exp.exp1 --full` runs the paper's 500 replications.
 - **MCS bootstrap replications (Section 5).** The paper uses 10,000 bootstrap
   replications; the executed run uses 2,000 (`MCS_BOOTSTRAP_REPS_RUN`).
@@ -177,5 +176,5 @@ of EWMA/Log-BEKK, contrary to the paper (**not reproduced**).
   reproduced; the cause was not isolated to the reduced universe specifically (no run at
   a second, larger universe size was completed) and is recorded as an open difference.
 - **10,000-replication Monte Carlo and 10,000-replication MCS bootstrap** were not run in
-  full within the time budget; the `--full` flags reproduce the paper's exact
+  full within the time available for this replication; the `--full` flags reproduce the paper's exact
   configuration but were not executed to completion in this session.

@@ -11,7 +11,7 @@ every parameter (Section 4.1).
 
 Run: python -m exp.exp1 [--full]
 ``--full`` runs the paper's 500 replications per cell (MC_REPLICATIONS_PAPER)
-instead of the reduced, time-budgeted MC_REPLICATIONS_RUN (see
+instead of the reduced MC_REPLICATIONS_RUN (see
 results/RESULTS.md, "Deviations from the paper").
 """
 from __future__ import annotations
