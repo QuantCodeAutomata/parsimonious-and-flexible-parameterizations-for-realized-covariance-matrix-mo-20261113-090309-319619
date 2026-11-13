@@ -16,6 +16,18 @@ results/RESULTS.md, "Deviations from the paper").
 """
 from __future__ import annotations
 
+import os
+
+# Each Monte Carlo replication is a single-threaded worker process; without
+# this, every worker's BLAS backend spawns its own thread pool (observed:
+# openblas defaulting to 4 threads per process), oversubscribing the 4 CPUs
+# by 4x and inflating wall-clock time by two orders of magnitude. Must be set
+# before numpy/scipy are imported anywhere in this process tree.
+os.environ.setdefault("OPENBLAS_NUM_THREADS", "1")
+os.environ.setdefault("OMP_NUM_THREADS", "1")
+os.environ.setdefault("MKL_NUM_THREADS", "1")
+os.environ.setdefault("NUMEXPR_NUM_THREADS", "1")
+
 import argparse
 import json
 import time
@@ -32,7 +44,7 @@ import matplotlib.pyplot as plt
 from data.data_loader import load_djia_realized_covariance
 from data.generate_synthetic import realized_covariance_s0, simulate_series
 from src.config import (
-    DJIA_END_DATE_RUN, DJIA_IDENTITY_DATE, DJIA_START_DATE_RUN, DJIA_TICKERS,
+    DJIA_IDENTITY_DATE, DJIA_MC_END_DATE, DJIA_MC_START_DATE, DJIA_MC_TICKERS,
     MC_BURNIN, MC_JB_SIGNIFICANCE, MC_REPLICATIONS_PAPER, MC_REPLICATIONS_RUN,
     MC_SAMPLE_SIZES, MC_SEED, MC_WORKERS, MODEL_NAMES, N_ASSETS, NU,
     PARAM_NAMES, RC_BAR_TIMEFRAME, TRUE_PARAMS,
@@ -69,7 +81,7 @@ def _gamma_bar_and_s0() -> tuple[np.ndarray, np.ndarray, dict]:
     Carlo DGP, both "extracted from the realized covariance series of the
     application in Section 5" (Section 4.1, footnote 5)."""
     dates, gamma_series, meta = load_djia_realized_covariance(
-        DJIA_TICKERS, DJIA_START_DATE_RUN, DJIA_END_DATE_RUN,
+        DJIA_MC_TICKERS, DJIA_MC_START_DATE, DJIA_MC_END_DATE,
         timeframe=RC_BAR_TIMEFRAME, identity_date=DJIA_IDENTITY_DATE,
     )
     gamma_bar = gamma_series.mean(axis=0)
@@ -77,7 +89,7 @@ def _gamma_bar_and_s0() -> tuple[np.ndarray, np.ndarray, dict]:
     info = {
         "n_days": int(len(dates)),
         "date_range": [str(dates.min()), str(dates.max())],
-        "universe_size": len(DJIA_TICKERS),
+        "universe_size": len(DJIA_MC_TICKERS),
     }
     return gamma_bar, s0, info
 

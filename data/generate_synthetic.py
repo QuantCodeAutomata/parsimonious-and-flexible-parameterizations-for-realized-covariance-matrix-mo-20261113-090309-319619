@@ -22,6 +22,18 @@ from scipy.stats import wishart
 from src.models import compute_A, unpack_params
 
 
+def _project_psd(mat: np.ndarray, floor: float = 1e-10) -> np.ndarray:
+    """Clip eigenvalues below ``floor`` to keep ``mat`` a valid Wishart scale
+    matrix. Only triggers on numerical round-off: exact arithmetic keeps S_t
+    PSD because every A_t of Section 3 is itself PSD and the Hadamard
+    product of two PSD matrices is PSD (Schur product theorem)."""
+    eigvals, eigvecs = np.linalg.eigh(mat)
+    if eigvals.min() > floor:
+        return mat
+    eigvals = np.clip(eigvals, floor, None)
+    return (eigvecs * eigvals) @ eigvecs.T
+
+
 def simulate_series(model: str, theta: np.ndarray, n: int, nu: int, t_len: int,
                      s0: np.ndarray, gamma_bar: np.ndarray, burn_in: int = 0,
                      rng: np.random.Generator | None = None) -> tuple[np.ndarray, np.ndarray]:
@@ -49,6 +61,10 @@ def simulate_series(model: str, theta: np.ndarray, n: int, nu: int, t_len: int,
         a_t = compute_A(model, theta, gamma_prev, n)
         s_t = p["kappa"] * gamma_bar + a_t * gamma_prev + p["b"] * s_prev
         s_t = 0.5 * (s_t + s_t.T)  # enforce exact symmetry against floating-point drift
+        s_t = _project_psd(s_t)  # guard against loss of positive definiteness from
+        # floating-point round-off accumulating along the recursion (model (2.3) is
+        # PSD-preserving in exact arithmetic by the Schur product theorem, since every
+        # A_t in Section 3 is itself PSD)
         gamma_t = wishart.rvs(df=nu, scale=s_t / nu, random_state=rng)
         gamma_full[t] = gamma_t
         s_full[t] = s_t

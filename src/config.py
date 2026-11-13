@@ -101,6 +101,16 @@ DJIA_START_DATE_RUN = "2024-01-02"   # shortened in-sample start (download-time 
 DJIA_END_DATE_RUN = DJIA_END_DATE_PAPER      # executed sample end equals the paper's sample end
 DJIA_IN_SAMPLE_END_RUN = DJIA_IN_SAMPLE_END_PAPER  # executed in-sample/out-of-sample split equals the paper's
 
+# Monte Carlo initial condition (Section 4.1, footnote 5: S_0 "extracted from
+# the realized covariance series of the application in Section 5"). The
+# Monte Carlo DGP always uses n=30 (Section 4.1), so Gamma_bar/S_0 are built
+# from the full 30-ticker universe, but only over one recent calendar
+# quarter (not the full 2015-2026 sample) since only a representative mean
+# and a single starting matrix are needed, not a full time series.
+DJIA_MC_TICKERS = DJIA_TICKERS_PAPER
+DJIA_MC_START_DATE = "2026-03-01"
+DJIA_MC_END_DATE = DJIA_END_DATE_PAPER
+
 EWMA_DECAY = 0.96          # EWMA decay parameter (Section 5: "decay parameter equal to 0.96")
 VECHAR_DAILY_LAG = 1       # vecHAR daily component lag, in trading days (Corsi 2009 HAR structure)
 VECHAR_WEEKLY_LAG = 5      # vecHAR weekly component window, in trading days
